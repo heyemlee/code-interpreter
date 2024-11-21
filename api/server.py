@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -18,6 +19,15 @@ CORS(app)
 # Load environment variables
 load_dotenv()
 
+# Get the absolute path of the current file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Build the absolute path to the CSV file
+CSV_PATH = os.path.join(BASE_DIR, '..', 'episode-info.csv')
+
+# Ensure the file exists
+if not os.path.exists(CSV_PATH):
+    print(f"Warning: CSV file not found at {CSV_PATH}")
 
 class CustomPythonREPLTool(PythonAstREPLTool):
     def __init__(self):
@@ -32,7 +42,6 @@ class CustomPythonREPLTool(PythonAstREPLTool):
 
         self.locals["create_ascii_qr"] = create_ascii_qr
 
-
 # Initialize agents
 python_llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
 python_agent_executor = create_python_agent(
@@ -45,7 +54,7 @@ python_agent_executor = create_python_agent(
 csv_llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
 csv_agent = create_csv_agent(
     llm=csv_llm,
-    path="../episode-info.csv",
+    path=CSV_PATH,  # Use the absolute path
     agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     allow_dangerous_code=True,
     verbose=True,
@@ -75,7 +84,6 @@ router_agent = create_react_agent(router_llm, tools, prompt)
 # Create agent executor
 agent_executor = AgentExecutor(agent=router_agent, tools=tools, verbose=True)
 
-
 @app.route("/api/python", methods=["POST"])
 def execute_python():
     try:
@@ -88,7 +96,6 @@ def execute_python():
         return jsonify({"result": str(result["output"])})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route("/api/csv", methods=["POST"])
 def analyze_csv():
@@ -103,7 +110,6 @@ def analyze_csv():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/api/router", methods=["POST"])
 def route_query():
     try:
@@ -116,7 +122,6 @@ def route_query():
         return jsonify({"result": str(result["output"])})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
