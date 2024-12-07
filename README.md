@@ -1,4 +1,4 @@
-![Image](public/c-i.jpg)
+![Image](public/c.jpg)
 
 ## 🚀 Features
 
