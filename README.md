@@ -1,3 +1,5 @@
+![Image](public/c-i.jpg)
+
 ## 🚀 Features
 
 - **QR Code Generation**: Create ASCII-based QR codes directly in the output
@@ -38,7 +40,7 @@
 
 - **Development Mode**
   ```bash
-  npm run dev
+  pnpm dev
   ```
   This command starts both the Vite development server and the Flask backend concurrently.
 
